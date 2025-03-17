@@ -13,6 +13,7 @@ export interface User {
 
 export type AuthContextType = {
   user: User | null;
+  isAuthenticated: boolean; // Add this missing property
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (email: string, password: string, name: string, role: string, department?: string) => Promise<void>;

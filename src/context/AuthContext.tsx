@@ -5,6 +5,7 @@ import { User, AuthContextType } from '@/lib/auth-types';
 // Default context state
 const defaultContext: AuthContextType = {
   user: null,
+  isAuthenticated: false, // Add this property
   login: async () => {},
   logout: async () => {},
   register: async () => {},
@@ -49,6 +50,7 @@ const mockUsers: User[] = [
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const isAuthenticated = !!user; // Compute isAuthenticated based on user
 
   // Check for stored authentication on component mount
   useEffect(() => {
@@ -134,10 +136,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Get all users
+  // Get all users - modified to return an array directly, not a Promise
   const getAllUsers = async (): Promise<User[]> => {
     // In a real app, this would fetch users from an API
-    return mockUsers;
+    return [...mockUsers]; // Return a copy to prevent modifications to the original array
   };
 
   // Create a new user
@@ -192,6 +194,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Context value
   const value = {
     user,
+    isAuthenticated, // Include the computed property
     login,
     logout,
     register,
