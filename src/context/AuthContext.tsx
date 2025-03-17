@@ -1,312 +1,209 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, UserRole, ERPSystem } from '@/lib/types';
-import { toast } from '@/components/ui/use-toast';
 
-export interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, role: UserRole, erpSystem?: ERPSystem) => Promise<void>;
-  logout: () => void;
-  getAllUsers: () => User[];
-  createUser: (user: Partial<User>, password: string) => Promise<User>;
-  updateUser: (userId: string, userData: Partial<User>) => Promise<User>;
-  deleteUser: (userId: string) => Promise<void>;
-  resetPassword: (userId: string, newPassword: string) => Promise<void>;
-}
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { User, AuthContextType } from '@/lib/auth-types';
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Default context state
+const defaultContext: AuthContextType = {
+  user: null,
+  login: async () => {},
+  logout: async () => {},
+  register: async () => {},
+  loading: true,
+  getAllUsers: async () => [],
+  createUser: async () => ({ id: '', email: '', name: '', role: 'client' }),
+  updateUser: async () => ({ id: '', email: '', name: '', role: 'client' }),
+  deleteUser: async () => {},
+};
 
-// Mock users for our demo
+// Create auth context
+const AuthContext = createContext<AuthContextType>(defaultContext);
+
+// Define sample users for testing
 const mockUsers: User[] = [
   {
     id: '1',
-    name: 'Admin User',
     email: 'admin@example.com',
+    name: 'Admin User',
     role: 'admin',
-    createdAt: new Date('2023-01-01'),
-    erpSystem: undefined
+    department: 'IT',
+    created_at: new Date().toISOString(),
   },
   {
     id: '2',
-    name: 'Support User',
     email: 'support@example.com',
+    name: 'Support Agent',
     role: 'support',
-    createdAt: new Date('2023-01-02'),
-    erpSystem: undefined
+    department: 'Customer Service',
+    created_at: new Date().toISOString(),
   },
   {
     id: '3',
-    name: 'Client User',
     email: 'client@example.com',
+    name: 'Client User',
     role: 'client',
-    createdAt: new Date('2023-01-03'),
-    erpSystem: 's4_hana'
-  },
-  {
-    id: '4',
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    role: 'client',
-    createdAt: new Date('2023-02-15'),
-    erpSystem: 'sap_bydesign'
-  },
-  {
-    id: '5',
-    name: 'Robert Johnson',
-    email: 'robert@example.com',
-    role: 'support',
-    createdAt: new Date('2023-03-10'),
-    erpSystem: undefined
+    created_at: new Date().toISOString(),
   },
 ];
 
+// Auth provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [loading, setLoading] = useState(true);
 
+  // Check for stored authentication on component mount
   useEffect(() => {
-    // Check for stored user on mount
     const storedUser = localStorage.getItem('user');
+    
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Failed to parse stored user', error);
+      } catch (e) {
+        console.error('Failed to parse stored user:', e);
         localStorage.removeItem('user');
       }
     }
-    setIsLoading(false);
+    
+    setLoading(false);
   }, []);
 
+  // Login function
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
+    setLoading(true);
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Simulate authentication delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Find user in mock data
-      const foundUser = users.find(u => u.email === email);
+      const foundUser = mockUsers.find(u => u.email === email);
       
-      if (foundUser && password === 'password') { // Simple password check
+      if (foundUser && password === 'password') { // Simple password check for demo
         setUser(foundUser);
         localStorage.setItem('user', JSON.stringify(foundUser));
-        toast({
-          title: 'Login successful',
-          description: `Welcome back, ${foundUser.name}!`,
-        });
       } else {
-        throw new Error('Invalid email or password');
+        throw new Error('Invalid credentials');
       }
     } catch (error) {
-      toast({
-        title: 'Login failed',
-        description: (error as Error).message,
-        variant: 'destructive',
-      });
+      console.error('Login error:', error);
       throw error;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const register = async (name: string, email: string, password: string, role: UserRole = 'client', erpSystem?: ERPSystem): Promise<void> => {
-    setIsLoading(true);
+  // Logout function
+  const logout = async () => {
+    setLoading(true);
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Check if user exists
-      if (users.some(u => u.email === email)) {
-        throw new Error('User with this email already exists');
-      }
-      
-      // Validate ERP system for clients
-      if (role === 'client' && !erpSystem) {
-        throw new Error('ERP system is required for client accounts');
-      }
+      // Clear user state and local storage
+      setUser(null);
+      localStorage.removeItem('user');
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Register function
+  const register = async (email: string, password: string, name: string, role: string, department?: string) => {
+    setLoading(true);
+    try {
+      // Simulate registration delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Create new user
       const newUser: User = {
-        id: (users.length + 1).toString(),
-        name,
+        id: (mockUsers.length + 1).toString(),
         email,
-        role,
-        createdAt: new Date(),
-        erpSystem: role === 'client' ? erpSystem : undefined
+        name,
+        role: role as 'admin' | 'client' | 'support',
+        department,
+        created_at: new Date().toISOString(),
       };
       
-      // Add the new user to our mock database
-      setUsers(prevUsers => [...prevUsers, newUser]);
-      
-      // Log in the new user if it's a client (self-registration)
-      if (role === 'client') {
-        setUser(newUser);
-        localStorage.setItem('user', JSON.stringify(newUser));
-      }
-      
-      toast({
-        title: 'Registration successful',
-        description: `Welcome, ${name}!`,
-      });
+      // In a real app, you would call your API here
+      // For now, we'll just set the new user
+      setUser(newUser);
+      localStorage.setItem('user', JSON.stringify(newUser));
     } catch (error) {
-      toast({
-        title: 'Registration failed',
-        description: (error as Error).message,
-        variant: 'destructive',
-      });
+      console.error('Registration error:', error);
       throw error;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-    toast({
-      title: 'Logged out',
-      description: 'You have been successfully logged out.',
-    });
+  // Get all users
+  const getAllUsers = async (): Promise<User[]> => {
+    // In a real app, this would fetch users from an API
+    return mockUsers;
   };
 
-  // Admin functions for user management
-  const getAllUsers = () => {
-    return users;
-  };
-
-  const createUser = async (userData: Partial<User>, password: string) => {
-    // Check if user is an admin
-    if (user?.role !== 'admin') {
-      throw new Error('Only administrators can create new users');
-    }
-    
-    if (!userData.name || !userData.email || !userData.role) {
-      throw new Error('Missing required user information');
-    }
-    
-    // Check if user exists
-    if (users.some(u => u.email === userData.email)) {
-      throw new Error('User with this email already exists');
-    }
-    
-    // Create new user
+  // Create a new user
+  const createUser = async (userData: Partial<User>): Promise<User> => {
+    // In a real app, this would create a user via API
     const newUser: User = {
-      id: (users.length + 1).toString(),
-      name: userData.name,
-      email: userData.email,
-      role: userData.role,
-      createdAt: new Date(),
-      erpSystem: userData.erpSystem
+      id: (mockUsers.length + 1).toString(),
+      email: userData.email || '',
+      name: userData.name || '',
+      role: userData.role || 'client',
+      department: userData.department,
+      created_at: new Date().toISOString(),
     };
     
-    // Update our mock database
-    setUsers(prevUsers => [...prevUsers, newUser]);
-    
-    toast({
-      title: 'User created',
-      description: `${newUser.name} has been added successfully.`,
-    });
-    
+    mockUsers.push(newUser);
     return newUser;
   };
 
-  const updateUser = async (userId: string, userData: Partial<User>) => {
-    // Check if user is an admin
-    if (user?.role !== 'admin') {
-      throw new Error('Only administrators can update users');
-    }
+  // Update a user
+  const updateUser = async (id: string, userData: Partial<User>): Promise<User> => {
+    // In a real app, this would update a user via API
+    const userIndex = mockUsers.findIndex(u => u.id === id);
     
-    const userIndex = users.findIndex(u => u.id === userId);
     if (userIndex === -1) {
       throw new Error('User not found');
     }
     
-    // Update user
-    const updatedUser = {
-      ...users[userIndex],
-      ...userData
-    };
+    const updatedUser = {...mockUsers[userIndex], ...userData};
+    mockUsers[userIndex] = updatedUser;
     
-    const newUsers = [...users];
-    newUsers[userIndex] = updatedUser;
-    setUsers(newUsers);
-    
-    toast({
-      title: 'User updated',
-      description: `${updatedUser.name}'s profile has been updated.`,
-    });
+    // If updating the current user, update state
+    if (user && user.id === id) {
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
     
     return updatedUser;
   };
 
-  const deleteUser = async (userId: string) => {
-    // Check if user is an admin
-    if (user?.role !== 'admin') {
-      throw new Error('Only administrators can delete users');
-    }
+  // Delete a user
+  const deleteUser = async (id: string): Promise<void> => {
+    // In a real app, this would delete a user via API
+    const userIndex = mockUsers.findIndex(u => u.id === id);
     
-    const userToDelete = users.find(u => u.id === userId);
-    if (!userToDelete) {
+    if (userIndex === -1) {
       throw new Error('User not found');
     }
     
-    // Remove user from our mock database
-    setUsers(users.filter(u => u.id !== userId));
-    
-    toast({
-      title: 'User deleted',
-      description: `${userToDelete.name} has been removed from the system.`,
-    });
+    mockUsers.splice(userIndex, 1);
   };
 
-  const resetPassword = async (userId: string, newPassword: string) => {
-    // Check if user is an admin
-    if (user?.role !== 'admin') {
-      throw new Error('Only administrators can reset passwords');
-    }
-    
-    const userToUpdate = users.find(u => u.id === userId);
-    if (!userToUpdate) {
-      throw new Error('User not found');
-    }
-    
-    // In a real app, this would hash the password and update it in the database
-    // For this demo, we'll just show a success message
-    
-    toast({
-      title: 'Password reset',
-      description: `Password has been reset for ${userToUpdate.name}.`,
-    });
+  // Context value
+  const value = {
+    user,
+    login,
+    logout,
+    register,
+    loading,
+    getAllUsers,
+    createUser,
+    updateUser,
+    deleteUser,
   };
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated: !!user,
-        isLoading,
-        login,
-        register,
-        logout,
-        getAllUsers,
-        createUser,
-        updateUser,
-        deleteUser,
-        resetPassword
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+// Custom hook to use auth context
+export const useAuth = () => useContext(AuthContext);
