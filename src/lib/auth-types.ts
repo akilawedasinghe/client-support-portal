@@ -1,4 +1,3 @@
-
 // Auth related types for the application
 
 export interface User {
@@ -13,8 +12,8 @@ export interface User {
 
 export type AuthContextType = {
   user: User | null;
-  isAuthenticated: boolean; // Add this missing property
-  login: (email: string, password: string) => Promise<void>;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<User | null>;
   logout: () => Promise<void>;
   register: (email: string, password: string, name: string, role: string, department?: string) => Promise<void>;
   loading: boolean;

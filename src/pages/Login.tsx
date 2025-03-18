@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -34,13 +33,22 @@ export default function Login() {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      await login(data.email, data.password);
-      
-      // Navigation will be handled by the auth redirect in useEffect
+      const result = await login(data.email, data.password);
+
+      if (result) {
+        toast({
+          title: "Login successful",
+          description: "You have been logged in successfully.",
+        });
+
+        // Navigation will be handled by the auth redirect
+      } else {
+        throw new Error("Invalid credentials");
+      }
     } catch (error) {
       toast({
         title: "Login failed",
-        description: (error as Error).message,
+        description: (error as Error).message || "Invalid credentials",
         variant: "destructive",
       });
     } finally {
@@ -60,24 +68,24 @@ export default function Login() {
     return <Navigate to={redirectPath} replace />;
   }
 
-  const setDefaultEmail = (role: UserRole) => {
-    let email = "";
-    
-    switch (role) {
-      case "admin":
-        email = "admin@example.com";
-        break;
-      case "support":
-        email = "support@example.com";
-        break;
-      case "client":
-        email = "client@example.com";
-        break;
-    }
-    
-    form.setValue("email", email);
-    form.setValue("password", "");
-  };
+  // const setDefaultEmail = (role: UserRole) => {
+  //   let email = "";
+
+  //   switch (role) {
+  //     case "admin":
+  //       email = "admin@example.com";
+  //       break;
+  //     case "support":
+  //       email = "support@example.com";
+  //       break;
+  //     case "client":
+  //       email = "client@example.com";
+  //       break;
+  //   }
+
+  //   form.setValue("email", email);
+  //   form.setValue("password", "password");
+  // };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
@@ -85,15 +93,15 @@ export default function Login() {
       <div className="w-full max-w-md animate-fade-in">
         <div className="flex items-center justify-center mb-8">
           <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-foreground">
-            <img 
-              src="/lovable-uploads/ad5f4ca3-93c0-436d-bbf3-b60ca083ed67.png" 
-              alt="Symetrix Logo" 
+            <img
+              src="/lovable-uploads/ad5f4ca3-93c0-436d-bbf3-b60ca083ed67.png"
+              alt="Symetrix Logo"
               className="h-8 w-8 object-contain"
             />
             <span>symetrix360 Portal</span>
           </Link>
         </div>
-        
+
         <Card className="border-none shadow-lg">
           <CardHeader>
             <CardTitle className="text-2xl">Welcome back</CardTitle>
@@ -101,13 +109,13 @@ export default function Login() {
               Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
-          
-          <Tabs 
-            defaultValue="client" 
-            className="w-full" 
+
+          <Tabs
+            defaultValue="client"
+            className="w-full"
             onValueChange={(value) => {
               setActiveTab(value as UserRole);
-              setDefaultEmail(value as UserRole);
+              // setDefaultEmail(value as UserRole);
             }}
           >
             <TabsList className="grid w-full grid-cols-3">
@@ -115,7 +123,7 @@ export default function Login() {
               <TabsTrigger value="support">Support</TabsTrigger>
               <TabsTrigger value="admin">Admin</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="client" className="mt-4">
               <CardContent>
                 <Form {...form}>
@@ -171,7 +179,7 @@ export default function Login() {
                     </Button>
                   </form>
                 </Form>
-                
+
                 <div className="mt-4 text-center">
                   <p className="text-sm text-muted-foreground">
                     Don't have an account?{" "}
@@ -185,7 +193,7 @@ export default function Login() {
                 </div>
               </CardContent>
             </TabsContent>
-            
+
             <TabsContent value="support" className="mt-4">
               <CardContent>
                 <Form {...form}>
@@ -241,14 +249,14 @@ export default function Login() {
                     </Button>
                   </form>
                 </Form>
-                
+
                 <div className="mt-4 text-center text-sm text-muted-foreground">
                   <p>Support access is restricted.</p>
                   <p>Contact an administrator for account access.</p>
                 </div>
               </CardContent>
             </TabsContent>
-            
+
             <TabsContent value="admin" className="mt-4">
               <CardContent>
                 <Form {...form}>
@@ -304,16 +312,16 @@ export default function Login() {
                     </Button>
                   </form>
                 </Form>
-                
+
                 <div className="mt-4 text-center text-sm text-muted-foreground">
                   <p>Admin access is restricted.</p>
-                  <p>This portal is for system administrators only.</p>
+                  <p>Contact the system administrator for access.</p>
                 </div>
               </CardContent>
             </TabsContent>
           </Tabs>
-          
-          <CardFooter className="flex flex-col border-t pt-4">
+
+          {/* <CardFooter className="flex flex-col border-t pt-4">
             <div className="text-center text-sm text-muted-foreground mb-2">
               <p>For demo purposes, use:</p>
               <div className="mt-1 space-y-1">
@@ -323,7 +331,7 @@ export default function Login() {
                 <p className="font-semibold">Password: password</p>
               </div>
             </div>
-          </CardFooter>
+          </CardFooter> */}
         </Card>
       </div>
     </div>

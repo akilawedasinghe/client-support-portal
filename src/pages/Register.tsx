@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -52,12 +51,20 @@ export default function Register() {
     }
     
     try {
-      await registerUser(data.name, data.email, data.password, "client", data.erpSystem);
-      navigate("/dashboard/client");
+      // Register as client
+      await registerUser(data.email, data.password, data.name, "client", data.erpSystem);
+      
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created. You can now log in.",
+      });
+      
+      // Redirect to login page
+      navigate("/login");
     } catch (error) {
       toast({
         title: "Registration failed",
-        description: (error as Error).message,
+        description: (error as Error).message || "Failed to create account",
         variant: "destructive",
       });
     } finally {

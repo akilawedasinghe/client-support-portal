@@ -1,5 +1,12 @@
+// Common types used throughout the application
 
-export type UserRole = 'client' | 'admin' | 'support';
+export type UserRole = 'admin' | 'client' | 'support';
+
+export type ERPSystem = 's4_hana' | 'sap_bydesign' | 'acumatica';
+
+export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+
+export type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
 
 export interface User {
   id: string;
@@ -12,9 +19,6 @@ export interface User {
   status?: 'active' | 'inactive';
 }
 
-export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
-export type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
-export type ERPSystem = 's4_hana' | 'sap_bydesign' | 'acumatica';
 export type Department = 
   | 'finance' 
   | 'procurement' 
