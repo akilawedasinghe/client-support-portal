@@ -52,7 +52,7 @@ export default function AdminRegister() {
     }
     
     try {
-      await registerUser(data.name, data.email, data.password, data.role);
+      await registerUser(data.email, data.password, data.name, data.role);
       
       // Redirect based on role
       if (data.role === "admin") {

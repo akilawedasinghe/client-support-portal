@@ -23,3 +23,16 @@ export type AuthContextType = {
   updateUser: (id: string, userData: Partial<User>) => Promise<User>;
   deleteUser: (id: string) => Promise<void>;
 };
+
+export interface Ticket {
+  id: string;
+  title: string;
+  description: string;
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  created_by: string;
+  assigned_to?: string;
+  created_at: string;
+  updated_at?: string;
+  category: string;
+}
