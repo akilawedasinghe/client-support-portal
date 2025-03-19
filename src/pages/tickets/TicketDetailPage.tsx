@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { 
-  ArrowLeft, AlertCircle, Clock, User, Tag, Calendar, 
+  ArrowLeft, AlertCircle, Clock, User as UserIcon, Tag, Calendar, 
   MessageSquare, PanelRight, ClipboardList 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { TicketChat } from "@/components/tickets/TicketChat";
 import { useAuth } from "@/context/AuthContext";
-import { Ticket, User } from "@/lib/types";
+import { Ticket } from "@/lib/auth-types"; // Use Ticket from auth-types to match the expected schema
+
+// Avoid User type clash by using ImportedUser
+import { User as ImportedUser } from "@/lib/auth-types";
 
 // Mock function to fetch ticket
 const fetchTicket = async (id: string): Promise<Ticket> => {
@@ -28,13 +30,13 @@ const fetchTicket = async (id: string): Promise<Ticket> => {
     description: "When trying to generate monthly reports, I get an error that says 'Database connection failed'. This happens consistently and prevents me from completing my work.",
     status: "in_progress",
     priority: "high",
-    created_by: "user-123",
+    created_by: "user-123", // This field exists in the Ticket type from auth-types
     assigned_to: "support-1",
     created_at: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
     updated_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
     category: "Technical Issue",
-    reporter: "John Doe",  // Adding this field
-    assignedAgent: "Jennifer Smith"  // Adding this field
+    reporter: "John Doe",
+    assignedAgent: "Jennifer Smith"
   };
 };
 
@@ -42,7 +44,7 @@ export default function TicketDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
   const { user, getAllUsers } = useAuth();
-  const [supportUsers, setSupportUsers] = useState<User[]>([]);
+  const [supportUsers, setSupportUsers] = useState<ImportedUser[]>([]);
   
   useEffect(() => {
     const loadSupportUsers = async () => {
@@ -154,8 +156,8 @@ export default function TicketDetailPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">{ticket.title}</CardTitle>
-          <CardDescription>Ticket #{ticket.id}</CardDescription>
+          <CardTitle className="text-2xl font-bold">{ticket?.title}</CardTitle>
+          <CardDescription>Ticket #{ticket?.id}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -170,7 +172,7 @@ export default function TicketDetailPage() {
               </div>
               <div className="flex items-center">
                 <div className="mr-2 text-gray-500">Category:</div>
-                <Badge variant="outline" className="text-gray-800">{ticket.category}</Badge>
+                <Badge variant="outline" className="text-gray-800">{ticket?.category}</Badge>
               </div>
             </div>
             
@@ -181,15 +183,15 @@ export default function TicketDetailPage() {
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">Reported By</h3>
                   <div className="flex items-center">
-                    <User className="h-4 w-4 text-gray-400 mr-2" />
-                    <span className="text-gray-900">{ticket.reporter}</span>
+                    <UserIcon className="h-4 w-4 text-gray-400 mr-2" />
+                    <span className="text-gray-900">{ticket?.reporter}</span>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">Created On</h3>
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 text-gray-400 mr-2" />
-                    <span className="text-gray-900">{formatDate(ticket.created_at)}</span>
+                    <span className="text-gray-900">{ticket && ticket.created_at ? formatDate(ticket.created_at) : 'N/A'}</span>
                   </div>
                 </div>
               </div>
@@ -198,15 +200,15 @@ export default function TicketDetailPage() {
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">Assigned To</h3>
                   <div className="flex items-center">
-                    <User className="h-4 w-4 text-gray-400 mr-2" />
-                    <span className="text-gray-900">{ticket.assignedAgent || "Unassigned"}</span>
+                    <UserIcon className="h-4 w-4 text-gray-400 mr-2" />
+                    <span className="text-gray-900">{ticket?.assignedAgent || "Unassigned"}</span>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">Last Updated</h3>
                   <div className="flex items-center">
                     <Clock className="h-4 w-4 text-gray-400 mr-2" />
-                    <span className="text-gray-900">{ticket.updated_at ? formatDate(ticket.updated_at) : "N/A"}</span>
+                    <span className="text-gray-900">{ticket && ticket.updated_at ? formatDate(ticket.updated_at) : "N/A"}</span>
                   </div>
                 </div>
               </div>
@@ -216,7 +218,7 @@ export default function TicketDetailPage() {
             
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-2">Description</h3>
-              <p className="text-gray-800 whitespace-pre-wrap">{ticket.description}</p>
+              <p className="text-gray-800 whitespace-pre-wrap">{ticket?.description}</p>
             </div>
           </div>
         </CardContent>
@@ -240,7 +242,7 @@ export default function TicketDetailPage() {
         
         <TabsContent value="conversation" className="w-full mt-4">
           <TicketChat 
-            ticket={ticket} 
+            ticket={ticket!} 
             statusBadge={getStatusBadge()} 
             priorityBadge={getPriorityBadge()} 
           />
@@ -278,7 +280,7 @@ export default function TicketDetailPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium">Ticket created</p>
-                    <p className="text-xs text-gray-500">{formatDate(ticket.created_at)}</p>
+                    <p className="text-xs text-gray-500">{ticket && ticket.created_at ? formatDate(ticket.created_at) : 'N/A'}</p>
                   </div>
                 </div>
               </div>

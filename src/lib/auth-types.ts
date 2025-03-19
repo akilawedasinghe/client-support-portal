@@ -1,4 +1,5 @@
 
+
 // Auth related types for the application
 
 export interface User {
@@ -39,3 +40,4 @@ export interface Ticket {
   reporter?: string;
   assignedAgent?: string;
 }
+

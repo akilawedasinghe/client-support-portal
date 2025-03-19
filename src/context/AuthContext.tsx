@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User, AuthContextType } from '@/lib/auth-types';
 import { supabase, getUserRole } from '@/lib/supabase';
@@ -7,10 +8,11 @@ import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 const defaultContext: AuthContextType = {
   user: null,
   isAuthenticated: false,
+  isLoading: true,  // Added this line
   login: async () => null,
   logout: async () => {},
   register: async () => {},
-  loading: true,
+  loading: true,    // Keeping this for backward compatibility
   getAllUsers: async () => [],
   createUser: async () => ({ id: '', email: '', name: '', role: 'client' }),
   updateUser: async () => ({ id: '', email: '', name: '', role: 'client' }),
@@ -302,6 +304,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value = {
     user,
     isAuthenticated,
+    isLoading: loading, // Added this line to map loading to isLoading
     login,
     logout,
     register,
