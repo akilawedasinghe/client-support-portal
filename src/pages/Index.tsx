@@ -8,27 +8,38 @@ const Index = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const [redirecting, setRedirecting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log("Index page loaded", { isAuthenticated, isLoading, user });
+    
+    // Only handle redirection if authentication check is complete
     if (!isLoading) {
       setRedirecting(true);
       
       // Delay the navigation slightly to ensure auth context is fully loaded
       const timer = setTimeout(() => {
-        if (isAuthenticated && user) {
-          // Redirect to appropriate dashboard based on user role
-          if (user.role === 'admin') {
-            navigate('/dashboard/admin');
-          } else if (user.role === 'support') {
-            navigate('/dashboard/support');
+        try {
+          if (isAuthenticated && user) {
+            console.log("Redirecting authenticated user to dashboard", user.role);
+            // Redirect to appropriate dashboard based on user role
+            if (user.role === 'admin') {
+              navigate('/dashboard/admin');
+            } else if (user.role === 'support') {
+              navigate('/dashboard/support');
+            } else {
+              navigate('/dashboard/client');
+            }
           } else {
-            navigate('/dashboard/client');
+            console.log("User not authenticated, redirecting to login");
+            // If not authenticated, redirect to login
+            navigate('/login');
           }
-        } else {
-          // If not authenticated, redirect to login
-          navigate('/login');
+        } catch (e) {
+          console.error("Navigation error:", e);
+          setError("Error during navigation. Please try again.");
         }
-      }, 300);
+      }, 500);
       
       return () => clearTimeout(timer);
     }
@@ -47,13 +58,23 @@ const Index = () => {
             symetrix360 Portal
           </h1>
           <p className="text-lg text-blue-300">
-            {redirecting ? "Redirecting to your dashboard..." : "Loading..."}
+            {error ? error : redirecting ? "Redirecting to your dashboard..." : "Loading..."}
           </p>
         </div>
         
         <div className="flex justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </div>
+        
+        {/* Debug info for development */}
+        {import.meta.env.DEV && (
+          <div className="mt-8 text-xs text-gray-400 max-w-md mx-auto text-left">
+            <p>isLoading: {isLoading ? "true" : "false"}</p>
+            <p>isAuthenticated: {isAuthenticated ? "true" : "false"}</p>
+            <p>redirecting: {redirecting ? "true" : "false"}</p>
+            <p>User: {user ? JSON.stringify(user.role) : "null"}</p>
+          </div>
+        )}
       </div>
     </div>
   );
