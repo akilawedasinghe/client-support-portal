@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -14,11 +15,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { TicketChat } from "@/components/tickets/TicketChat";
 import { useAuth } from "@/context/AuthContext";
-import { Ticket as AuthTicket } from "@/lib/auth-types";
 import { Ticket, Department, ERPSystem } from "@/lib/types";
 import { User as ImportedUser } from "@/lib/auth-types";
 
-const fetchTicket = async (id: string): Promise<Ticket> => {
+// Create a type that combines both interfaces for the mock data
+type CombinedTicket = Ticket & {
+  // Additional fields needed for backward compatibility
+  created_by?: string;
+  assigned_to?: string;
+  created_at?: string;
+  updated_at?: string;
+  category?: string;
+  reporter?: string;
+  assignedAgent?: string;
+};
+
+const fetchTicket = async (id: string): Promise<CombinedTicket> => {
   await new Promise(resolve => setTimeout(resolve, 500));
   
   const createdDate = new Date(Date.now() - 86400000 * 2);
@@ -28,22 +40,26 @@ const fetchTicket = async (id: string): Promise<Ticket> => {
     id,
     title: "Database Connection Error in Reporting Module",
     description: "When trying to generate monthly reports, I get an error that says 'Database connection failed'. This happens consistently and prevents me from completing my work.",
-    status: "in_progress",
-    priority: "high",
+    status: "in_progress" as const,
+    priority: "high" as const,
+    
+    // Fields from types.ts Ticket interface
+    erpSystem: "s4_hana" as ERPSystem,
+    department: "finance" as Department,
+    clientId: "user-123",
+    createdAt: createdDate,
+    updatedAt: updatedDate,
+    supportId: "support-1",
+    attachments: [],
+    
+    // Additional fields for backward compatibility and UI display
     created_by: "user-123",
     assigned_to: "support-1",
     created_at: createdDate.toISOString(),
     updated_at: updatedDate.toISOString(),
     category: "Technical Issue",
     reporter: "John Doe",
-    assignedAgent: "Jennifer Smith",
-    
-    erpSystem: "s4_hana" as ERPSystem,
-    department: "finance" as Department,
-    clientId: "user-123",
-    createdAt: createdDate,
-    updatedAt: updatedDate,
-    attachments: []
+    assignedAgent: "Jennifer Smith"
   };
 };
 
@@ -196,7 +212,9 @@ export default function TicketDetailPage() {
                   <h3 className="text-sm font-medium text-gray-500 mb-1">Created On</h3>
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 text-gray-400 mr-2" />
-                    <span className="text-gray-900">{ticket && ticket.created_at ? formatDate(ticket.created_at) : 'N/A'}</span>
+                    <span className="text-gray-900">
+                      {ticket?.created_at ? formatDate(ticket.created_at) : formatDate(ticket.createdAt.toISOString())}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -213,7 +231,9 @@ export default function TicketDetailPage() {
                   <h3 className="text-sm font-medium text-gray-500 mb-1">Last Updated</h3>
                   <div className="flex items-center">
                     <Clock className="h-4 w-4 text-gray-400 mr-2" />
-                    <span className="text-gray-900">{ticket && ticket.updated_at ? formatDate(ticket.updated_at) : "N/A"}</span>
+                    <span className="text-gray-900">
+                      {ticket?.updated_at ? formatDate(ticket.updated_at) : formatDate(ticket.updatedAt.toISOString())}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -247,7 +267,7 @@ export default function TicketDetailPage() {
         
         <TabsContent value="conversation" className="w-full mt-4">
           <TicketChat 
-            ticket={ticket!} 
+            ticket={ticket as any} 
             statusBadge={getStatusBadge()} 
             priorityBadge={getPriorityBadge()} 
           />
@@ -285,7 +305,9 @@ export default function TicketDetailPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium">Ticket created</p>
-                    <p className="text-xs text-gray-500">{ticket && ticket.created_at ? formatDate(ticket.created_at) : 'N/A'}</p>
+                    <p className="text-xs text-gray-500">
+                      {ticket?.created_at ? formatDate(ticket.created_at) : formatDate(ticket.createdAt.toISOString())}
+                    </p>
                   </div>
                 </div>
               </div>
