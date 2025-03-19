@@ -17,6 +17,9 @@ const Index = () => {
       } else {
         navigate('/dashboard/client');
       }
+    } else {
+      // If not authenticated, redirect to login
+      navigate('/login');
     }
   }, [isAuthenticated, user, navigate]);
 

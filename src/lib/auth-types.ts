@@ -18,7 +18,7 @@ export type AuthContextType = {
   login: (email: string, password: string) => Promise<User | null>;
   logout: () => Promise<void>;
   register: (email: string, password: string, name: string, role: string, department?: string) => Promise<void>;
-  loading: boolean;
+  loading: boolean; // This seems redundant with isLoading but keeping for backward compatibility
   getAllUsers: () => Promise<User[]>;
   createUser: (userData: Partial<User>) => Promise<User>;
   updateUser: (id: string, userData: Partial<User>) => Promise<User>;
