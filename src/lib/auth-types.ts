@@ -1,3 +1,4 @@
+
 // Auth related types for the application
 
 export interface User {
@@ -13,6 +14,7 @@ export interface User {
 export type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<User | null>;
   logout: () => Promise<void>;
   register: (email: string, password: string, name: string, role: string, department?: string) => Promise<void>;
@@ -34,4 +36,6 @@ export interface Ticket {
   created_at: string;
   updated_at?: string;
   category: string;
+  reporter?: string;
+  assignedAgent?: string;
 }

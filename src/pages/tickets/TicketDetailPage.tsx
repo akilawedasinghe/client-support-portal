@@ -1,235 +1,373 @@
+
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { useParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { 
+  ArrowLeft, AlertCircle, Clock, User, Tag, Calendar, 
+  MessageSquare, PanelRight, ClipboardList 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
-import { Ticket, User } from "@/lib/auth-types";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { TicketChat } from "@/components/tickets/TicketChat";
+import { useAuth } from "@/context/AuthContext";
+import { Ticket, User } from "@/lib/types";
 
-const TicketDetailPage = () => {
+// Mock function to fetch ticket
+const fetchTicket = async (id: string): Promise<Ticket> => {
+  // In a real app, this would be an API call
+  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+  
+  return {
+    id,
+    title: "Database Connection Error in Reporting Module",
+    description: "When trying to generate monthly reports, I get an error that says 'Database connection failed'. This happens consistently and prevents me from completing my work.",
+    status: "in_progress",
+    priority: "high",
+    created_by: "user-123",
+    assigned_to: "support-1",
+    created_at: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
+    updated_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+    category: "Technical Issue",
+    reporter: "John Doe",  // Adding this field
+    assignedAgent: "Jennifer Smith"  // Adding this field
+  };
+};
+
+export default function TicketDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { user, getAllUsers } = useAuth();
   const { toast } = useToast();
-
-  const [ticket, setTicket] = useState<Ticket | null>(null);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("open");
-  const [priority, setPriority] = useState("medium");
-  const [assignedAgent, setAssignedAgent] = useState("");
-  const [supportAgents, setSupportAgents] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Mock function to simulate fetching ticket data
-  const fetchTicket = async (ticketId: string) => {
-    // Replace this with your actual API call
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate delay
-    const mockTicket: Ticket = {
-      id: ticketId,
-      title: "Sample Ticket",
-      description: "This is a sample ticket description.",
-      status: "open",
-      priority: "medium",
-      reporter: "client@example.com",
-      assignedAgent: "support@example.com",
-      createdAt: new Date().toISOString(),
-    };
-    return mockTicket;
-  };
-
+  const { user, getAllUsers } = useAuth();
+  const [supportUsers, setSupportUsers] = useState<User[]>([]);
+  
   useEffect(() => {
-    const loadTicket = async () => {
-      if (id) {
-        setIsLoading(true);
-        try {
-          const fetchedTicket = await fetchTicket(id);
-          setTicket(fetchedTicket);
-          setTitle(fetchedTicket.title);
-          setDescription(fetchedTicket.description);
-          setStatus(fetchedTicket.status);
-          setPriority(fetchedTicket.priority);
-          setAssignedAgent(fetchedTicket.assignedAgent || "");
-        } catch (error) {
-          toast({
-            title: "Error fetching ticket",
-            description: (error as Error).message,
-            variant: "destructive",
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadTicket();
-  }, [id, toast]);
-
-  // Get users for assignments
-  useEffect(() => {
-    const fetchUsers = async () => {
+    const loadSupportUsers = async () => {
       try {
-        const allUsers = await getAllUsers();
-        // Now that we have the array, we can filter it
-        const supportUsers = allUsers.filter(user => user.role === 'support');
-        setSupportAgents(supportUsers);
+        const users = await getAllUsers();
+        setSupportUsers(users.filter(u => u.role === 'support'));
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error("Failed to load support users:", error);
       }
     };
-
-    if (ticket) {
-      fetchUsers();
-    }
-  }, [ticket, getAllUsers]);
-
-  const handleUpdateTicket = async () => {
-    setIsLoading(true);
-    try {
-      // Simulate API call to update ticket
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Update local state
-      setTicket({
-        ...ticket!,
-        title,
-        description,
-        status,
-        priority,
-        assignedAgent,
-      });
-
-      toast({
-        title: "Ticket updated",
-        description: "Ticket details have been updated successfully.",
-      });
-      navigate("/dashboard/support");
-    } catch (error) {
-      toast({
-        title: "Error updating ticket",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (isLoading || !ticket) {
+    
+    loadSupportUsers();
+  }, [getAllUsers]);
+  
+  const { data: ticket, isLoading, error } = useQuery({
+    queryKey: ['ticket', id],
+    queryFn: () => fetchTicket(id || ''),
+    enabled: !!id
+  });
+  
+  if (isLoading) {
+    return <TicketSkeleton />;
+  }
+  
+  if (error || !ticket) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-gray-900">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative h-16 w-16">
-            <div className="absolute inset-0 h-full w-full animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-            <div className="absolute inset-2 h-[calc(100%-16px)] w-[calc(100%-16px)] animate-spin rounded-full border-4 border-blue-400 border-b-transparent" style={{ animationDirection: 'reverse', animationDuration: '1.2s' }}></div>
-          </div>
-          <p className="text-sm font-medium text-slate-400">Loading...</p>
+      <div className="container mx-auto p-6">
+        <div className="flex justify-between items-center mb-6">
+          <Link to="/tickets" className="flex items-center text-blue-600 hover:text-blue-800">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to tickets
+          </Link>
         </div>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center justify-center py-12">
+              <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Ticket Not Found</h2>
+              <p className="text-gray-600 mb-6">The ticket you're looking for doesn't exist or there was an error loading it.</p>
+              <Button asChild>
+                <Link to="/tickets">View All Tickets</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
+  // Create proper status badge
+  const getStatusBadge = () => {
+    const statusMap: Record<string, { color: string; label: string }> = {
+      'open': { color: 'bg-blue-100 text-blue-800', label: 'Open' },
+      'in_progress': { color: 'bg-yellow-100 text-yellow-800', label: 'In Progress' },
+      'resolved': { color: 'bg-green-100 text-green-800', label: 'Resolved' },
+      'closed': { color: 'bg-gray-100 text-gray-800', label: 'Closed' }
+    };
+    
+    const status = statusMap[ticket.status as keyof typeof statusMap] || statusMap.open;
+    
+    return (
+      <Badge className={`${status.color} hover:${status.color}`}>
+        {status.label}
+      </Badge>
+    );
+  };
+  
+  // Create proper priority badge
+  const getPriorityBadge = () => {
+    const priorityMap: Record<string, { color: string; label: string }> = {
+      'low': { color: 'bg-gray-100 text-gray-800', label: 'Low' },
+      'medium': { color: 'bg-blue-100 text-blue-800', label: 'Medium' },
+      'high': { color: 'bg-orange-100 text-orange-800', label: 'High' },
+      'urgent': { color: 'bg-red-100 text-red-800', label: 'Urgent' }
+    };
+    
+    const priority = priorityMap[ticket.priority as keyof typeof priorityMap] || priorityMap.medium;
+    
+    return (
+      <Badge className={`${priority.color} hover:${priority.color}`}>
+        {priority.label}
+      </Badge>
+    );
+  };
+  
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  };
+  
   return (
-    <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <Card className="border-none shadow-lg">
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <Link to="/tickets" className="flex items-center text-blue-600 hover:text-blue-800">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to tickets
+        </Link>
+        <div className="flex space-x-2">
+          <Button variant="outline">Edit Ticket</Button>
+          <Button variant="destructive">Close Ticket</Button>
+        </div>
+      </div>
+      
+      <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Ticket Details</CardTitle>
-          <CardDescription>
-            View and update details for ticket #{ticket.id}
-          </CardDescription>
+          <CardTitle className="text-2xl font-bold">{ticket.title}</CardTitle>
+          <CardDescription>Ticket #{ticket.id}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4">
-            <div>
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed">
-                Title
-              </label>
-              <Input
-                type="text"
-                placeholder="Ticket Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed">
-                Description
-              </label>
-              <Textarea
-                placeholder="Detailed description of the issue"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed">
-                  Status
-                </label>
-                <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="open">Open</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="resolved">Resolved</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                  </SelectContent>
-                </Select>
+          <div className="space-y-6">
+            <div className="flex flex-wrap gap-2 sm:gap-4">
+              <div className="flex items-center">
+                <div className="mr-2 text-gray-500">Status:</div>
+                {getStatusBadge()}
               </div>
-              <div>
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed">
-                  Priority
-                </label>
-                <Select value={priority} onValueChange={setPriority}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select priority" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center">
+                <div className="mr-2 text-gray-500">Priority:</div>
+                {getPriorityBadge()}
+              </div>
+              <div className="flex items-center">
+                <div className="mr-2 text-gray-500">Category:</div>
+                <Badge variant="outline" className="text-gray-800">{ticket.category}</Badge>
               </div>
             </div>
+            
+            <Separator />
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Reported By</h3>
+                  <div className="flex items-center">
+                    <User className="h-4 w-4 text-gray-400 mr-2" />
+                    <span className="text-gray-900">{ticket.reporter}</span>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Created On</h3>
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 text-gray-400 mr-2" />
+                    <span className="text-gray-900">{formatDate(ticket.created_at)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Assigned To</h3>
+                  <div className="flex items-center">
+                    <User className="h-4 w-4 text-gray-400 mr-2" />
+                    <span className="text-gray-900">{ticket.assignedAgent || "Unassigned"}</span>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Last Updated</h3>
+                  <div className="flex items-center">
+                    <Clock className="h-4 w-4 text-gray-400 mr-2" />
+                    <span className="text-gray-900">{ticket.updated_at ? formatDate(ticket.updated_at) : "N/A"}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <Separator />
+            
             <div>
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed">
-                Assign Agent
-              </label>
-              <Select value={assignedAgent} onValueChange={setAssignedAgent}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select agent" />
-                </SelectTrigger>
-                <SelectContent>
-                  {supportAgents.map((agent) => (
-                    <SelectItem key={agent.id} value={agent.email}>
-                      {agent.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Description</h3>
+              <p className="text-gray-800 whitespace-pre-wrap">{ticket.description}</p>
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end">
-          <Button onClick={handleUpdateTicket} disabled={isLoading}>
-            {isLoading ? "Updating..." : "Update Ticket"}
-          </Button>
-        </CardFooter>
       </Card>
+      
+      <Tabs defaultValue="conversation" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="conversation" className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Conversation
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="flex items-center gap-2">
+            <ClipboardList className="h-4 w-4" />
+            Activity Log
+          </TabsTrigger>
+          <TabsTrigger value="attachments" className="flex items-center gap-2">
+            <PanelRight className="h-4 w-4" />
+            Attachments
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="conversation" className="w-full mt-4">
+          <TicketChat 
+            ticket={ticket} 
+            statusBadge={getStatusBadge()} 
+            priorityBadge={getPriorityBadge()} 
+          />
+        </TabsContent>
+        
+        <TabsContent value="activity" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Activity Log</CardTitle>
+              <CardDescription>Track all activities related to this ticket</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="min-w-fit pt-1">
+                    <span className="flex h-2 w-2 rounded-full bg-blue-600"></span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Ticket assigned to Jennifer Smith</p>
+                    <p className="text-xs text-gray-500">Today at 10:30 AM</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="min-w-fit pt-1">
+                    <span className="flex h-2 w-2 rounded-full bg-yellow-600"></span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Status changed to In Progress</p>
+                    <p className="text-xs text-gray-500">Yesterday at 2:15 PM</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="min-w-fit pt-1">
+                    <span className="flex h-2 w-2 rounded-full bg-green-600"></span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Ticket created</p>
+                    <p className="text-xs text-gray-500">{formatDate(ticket.created_at)}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="attachments" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Attachments</CardTitle>
+              <CardDescription>Files uploaded to this ticket</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <p className="text-gray-500">No attachments have been uploaded yet.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-};
+}
 
-export default TicketDetailPage;
+// Loading skeleton component
+function TicketSkeleton() {
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <Skeleton className="h-6 w-32" />
+        <div className="flex space-x-2">
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-28" />
+        </div>
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-5 w-32 mt-2" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="flex flex-wrap gap-4">
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-6 w-24" />
+            </div>
+            <Separator />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <Skeleton className="h-4 w-24 mb-2" />
+                  <Skeleton className="h-6 w-40" />
+                </div>
+                <div>
+                  <Skeleton className="h-4 w-24 mb-2" />
+                  <Skeleton className="h-6 w-44" />
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <Skeleton className="h-4 w-24 mb-2" />
+                  <Skeleton className="h-6 w-40" />
+                </div>
+                <div>
+                  <Skeleton className="h-4 w-24 mb-2" />
+                  <Skeleton className="h-6 w-44" />
+                </div>
+              </div>
+            </div>
+            <Separator />
+            <div>
+              <Skeleton className="h-4 w-32 mb-2" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full mt-2" />
+              <Skeleton className="h-4 w-3/4 mt-2" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <div className="mt-4">
+        <Skeleton className="h-12 w-full mb-4" />
+        <div className="border rounded-lg p-6">
+          <Skeleton className="h-[60vh] w-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
