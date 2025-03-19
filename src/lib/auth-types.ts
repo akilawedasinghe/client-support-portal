@@ -1,5 +1,3 @@
-
-
 // Auth related types for the application
 
 export interface User {
@@ -26,6 +24,8 @@ export type AuthContextType = {
   deleteUser: (id: string) => Promise<void>;
 };
 
+// This interface might be duplicating functionality from types.ts
+// But we're keeping it for backward compatibility
 export interface Ticket {
   id: string;
   title: string;
@@ -40,4 +40,3 @@ export interface Ticket {
   reporter?: string;
   assignedAgent?: string;
 }
-

@@ -14,15 +14,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { TicketChat } from "@/components/tickets/TicketChat";
 import { useAuth } from "@/context/AuthContext";
-import { Ticket } from "@/lib/auth-types"; // Use Ticket from auth-types to match the expected schema
-
-// Avoid User type clash by using ImportedUser
+import { Ticket as AuthTicket } from "@/lib/auth-types";
+import { Ticket, Department, ERPSystem } from "@/lib/types";
 import { User as ImportedUser } from "@/lib/auth-types";
 
-// Mock function to fetch ticket
 const fetchTicket = async (id: string): Promise<Ticket> => {
-  // In a real app, this would be an API call
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const createdDate = new Date(Date.now() - 86400000 * 2);
+  const updatedDate = new Date(Date.now() - 3600000);
   
   return {
     id,
@@ -30,13 +30,20 @@ const fetchTicket = async (id: string): Promise<Ticket> => {
     description: "When trying to generate monthly reports, I get an error that says 'Database connection failed'. This happens consistently and prevents me from completing my work.",
     status: "in_progress",
     priority: "high",
-    created_by: "user-123", // This field exists in the Ticket type from auth-types
+    created_by: "user-123",
     assigned_to: "support-1",
-    created_at: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
-    updated_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+    created_at: createdDate.toISOString(),
+    updated_at: updatedDate.toISOString(),
     category: "Technical Issue",
     reporter: "John Doe",
-    assignedAgent: "Jennifer Smith"
+    assignedAgent: "Jennifer Smith",
+    
+    erpSystem: "s4_hana" as ERPSystem,
+    department: "finance" as Department,
+    clientId: "user-123",
+    createdAt: createdDate,
+    updatedAt: updatedDate,
+    attachments: []
   };
 };
 
@@ -94,7 +101,6 @@ export default function TicketDetailPage() {
     );
   }
 
-  // Create proper status badge
   const getStatusBadge = () => {
     const statusMap: Record<string, { color: string; label: string }> = {
       'open': { color: 'bg-blue-100 text-blue-800', label: 'Open' },
@@ -112,7 +118,6 @@ export default function TicketDetailPage() {
     );
   };
   
-  // Create proper priority badge
   const getPriorityBadge = () => {
     const priorityMap: Record<string, { color: string; label: string }> = {
       'low': { color: 'bg-gray-100 text-gray-800', label: 'Low' },
@@ -306,7 +311,6 @@ export default function TicketDetailPage() {
   );
 }
 
-// Loading skeleton component
 function TicketSkeleton() {
   return (
     <div className="container mx-auto p-6 space-y-6">
