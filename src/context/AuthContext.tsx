@@ -1,28 +1,8 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User, AuthContextType } from '@/lib/auth-types';
-import { supabase, getUserRole } from '@/lib/supabase';
-import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 
-// Default context state
-const defaultContext: AuthContextType = {
-  user: null,
-  isAuthenticated: false,
-  isLoading: true,
-  login: async () => null,
-  logout: async () => {},
-  register: async () => {},
-  loading: true,
-  getAllUsers: async () => [],
-  createUser: async () => ({ id: '', email: '', name: '', role: 'client' }),
-  updateUser: async () => ({ id: '', email: '', name: '', role: 'client' }),
-  deleteUser: async () => {},
-};
-
-// Create auth context
-const AuthContext = createContext<AuthContextType>(defaultContext);
-
-// Define sample users for testing (keeping this for fallback)
+// Define mock users 
 const mockUsers: User[] = [
   {
     id: '1',
@@ -47,36 +27,50 @@ const mockUsers: User[] = [
     role: 'client',
     created_at: new Date().toISOString(),
   },
+  // Additional demo users
+  {
+    id: '4',
+    email: 'john.smith@company.com',
+    name: 'John Smith',
+    role: 'client',
+    department: 'Finance',
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: '5',
+    email: 'sarah.tech@example.com',
+    name: 'Sarah Tech',
+    role: 'support',
+    department: 'Technical Support',
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: '6',
+    email: 'director@example.com',
+    name: 'System Director',
+    role: 'admin',
+    department: 'Executive',
+    created_at: new Date().toISOString(),
+  },
 ];
 
-// Helper function to transform Supabase user to our User type
-const transformUser = async (supabaseUser: SupabaseUser | null): Promise<User | null> => {
-  if (!supabaseUser) return null;
-  
-  try {
-    // Get user role from our helper function
-    const role = await getUserRole(supabaseUser.id);
-    
-    // Get user profile data from profiles table
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('name, department')
-      .eq('id', supabaseUser.id)
-      .single();
-    
-    return {
-      id: supabaseUser.id,
-      email: supabaseUser.email || '',
-      name: profile?.name || supabaseUser.email?.split('@')[0] || '',
-      role: role || 'client',
-      department: profile?.department,
-      created_at: supabaseUser.created_at,
-    };
-  } catch (error) {
-    console.error('Error transforming user:', error);
-    return null;
-  }
+// Default context state
+const defaultContext: AuthContextType = {
+  user: null,
+  isAuthenticated: false,
+  isLoading: true,
+  login: async () => null,
+  logout: async () => {},
+  register: async () => {},
+  loading: true,
+  getAllUsers: async () => [],
+  createUser: async () => ({ id: '', email: '', name: '', role: 'client' }),
+  updateUser: async () => ({ id: '', email: '', name: '', role: 'client' }),
+  deleteUser: async () => {},
 };
+
+// Create auth context
+const AuthContext = createContext<AuthContextType>(defaultContext);
 
 // Auth provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -90,35 +84,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       
       try {
-        // First try to get from localStorage for backward compatibility
+        // Get from localStorage
         const storedUser = localStorage.getItem('user');
         
         if (storedUser) {
           try {
             setUser(JSON.parse(storedUser));
-            console.log("User loaded from localStorage");
-            setLoading(false);
-            return;
+            console.log("User loaded from localStorage:", JSON.parse(storedUser));
           } catch (e) {
             console.error('Failed to parse stored user:', e);
             localStorage.removeItem('user');
           }
-        }
-        
-        // If no stored user, try Supabase session
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          
-          if (session) {
-            const transformedUser = await transformUser(session.user);
-            if (transformedUser) {
-              setUser(transformedUser);
-              localStorage.setItem('user', JSON.stringify(transformedUser));
-            }
-          }
-        } catch (supabaseError) {
-          console.warn('Supabase authentication unavailable. Using mock authentication instead.');
-          // Do nothing here, will fall through to default not authenticated state
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
@@ -130,51 +106,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth();
   }, []);
 
-  // Login function
+  // Login function - use mock users only
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
       console.log("Attempting login with:", email);
       
-      // For demo/testing purposes, allow login with mock users
-      if (password === 'password') {
-        const mockUser = mockUsers.find(u => u.email === email);
-        if (mockUser) {
-          console.log("Mock user login successful");
-          setUser(mockUser);
-          localStorage.setItem('user', JSON.stringify(mockUser));
-          return mockUser;
-        }
+      // Allow login with any password for demo purposes
+      const mockUser = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+      if (mockUser) {
+        console.log("Mock user login successful");
+        setUser(mockUser);
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        return mockUser;
       }
       
-      // Try Supabase login
-      try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        
-        if (error) throw error;
-        
-        const transformedUser = await transformUser(data.user);
-        if (transformedUser) {
-          setUser(transformedUser);
-          localStorage.setItem('user', JSON.stringify(transformedUser));
-          return transformedUser;
-        }
-      } catch (supabaseError) {
-        console.warn('Supabase login failed, using mock authentication:', supabaseError);
-        // If Supabase fails but we have a matching mock user, use that
-        const mockUser = mockUsers.find(u => u.email === email);
-        if (mockUser && password === 'password') {
-          setUser(mockUser);
-          localStorage.setItem('user', JSON.stringify(mockUser));
-          return mockUser;
-        }
-        throw supabaseError;
-      }
-      
-      return null;
+      throw new Error("Invalid credentials");
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -187,13 +134,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     setLoading(true);
     try {
-      // Try Supabase logout
-      try {
-        await supabase.auth.signOut();
-      } catch (supabaseError) {
-        console.warn('Supabase logout failed, clearing local state only:', supabaseError);
-      }
-      
       // Clear user state and local storage
       setUser(null);
       localStorage.removeItem('user');
@@ -205,100 +145,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Register function
+  // Register function - creates a new mock user
   const register = async (email: string, password: string, name: string, role: string, department?: string) => {
     setLoading(true);
     try {
-      // For demo purposes, create a mock user if Supabase is not available
-      if (password === 'password') {
-        const newMockUser: User = {
-          id: (mockUsers.length + 1).toString(),
-          email,
-          name,
-          role: role as 'admin' | 'client' | 'support',
-          department,
-          created_at: new Date().toISOString(),
-        };
-        
-        mockUsers.push(newMockUser);
-        setUser(newMockUser);
-        localStorage.setItem('user', JSON.stringify(newMockUser));
-        setLoading(false);
-        return;
-      }
+      const newMockUser: User = {
+        id: (mockUsers.length + 1).toString(),
+        email,
+        name,
+        role: role as 'admin' | 'client' | 'support',
+        department,
+        created_at: new Date().toISOString(),
+      };
       
-      // Register user with Supabase
-      try {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              name,
-              role,
-              department
-            }
-          }
-        });
-        
-        if (error) throw error;
-        
-        if (data.user) {
-          try {
-            // Create profile entry
-            const { error: profileError } = await supabase
-              .from('profiles')
-              .insert({
-                id: data.user.id,
-                name,
-                department,
-              });
-            
-            if (profileError) console.error('Profile creation error:', profileError);
-            
-            // Create role entry
-            const { error: roleError } = await supabase
-              .from('user_roles')
-              .insert({
-                user_id: data.user.id,
-                role: role as 'admin' | 'client' | 'support',
-              });
-            
-            if (roleError) console.error('Role assignment error:', roleError);
-          } catch (err) {
-            console.error('Error creating user profile/role:', err);
-          }
-          
-          // For backward compatibility, create a user object and store it
-          const newUser: User = {
-            id: data.user.id,
-            email,
-            name,
-            role: role as 'admin' | 'client' | 'support',
-            department,
-            created_at: new Date().toISOString(),
-          };
-          
-          setUser(newUser);
-          localStorage.setItem('user', JSON.stringify(newUser));
-        }
-      } catch (supabaseError) {
-        console.warn('Supabase registration failed, using mock user:', supabaseError);
-        
-        // Create mock user if Supabase fails
-        const newMockUser: User = {
-          id: (mockUsers.length + 1).toString(),
-          email,
-          name,
-          role: role as 'admin' | 'client' | 'support',
-          department,
-          created_at: new Date().toISOString(),
-        };
-        
-        mockUsers.push(newMockUser);
-        setUser(newMockUser);
-        localStorage.setItem('user', JSON.stringify(newMockUser));
-      }
+      mockUsers.push(newMockUser);
+      setUser(newMockUser);
+      localStorage.setItem('user', JSON.stringify(newMockUser));
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
@@ -309,13 +171,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Get all users
   const getAllUsers = async (): Promise<User[]> => {
-    // For backward compatibility, return mock users
     return [...mockUsers];
   };
 
   // Create a new user
   const createUser = async (userData: Partial<User>): Promise<User> => {
-    // For backward compatibility, create a mock user
     const newUser: User = {
       id: (mockUsers.length + 1).toString(),
       email: userData.email || '',
@@ -331,7 +191,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Update a user
   const updateUser = async (id: string, userData: Partial<User>): Promise<User> => {
-    // For backward compatibility, update a mock user
     const userIndex = mockUsers.findIndex(u => u.id === id);
     
     if (userIndex === -1) {
@@ -352,7 +211,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Delete a user
   const deleteUser = async (id: string): Promise<void> => {
-    // For backward compatibility, delete a mock user
     const userIndex = mockUsers.findIndex(u => u.id === id);
     
     if (userIndex === -1) {
@@ -366,7 +224,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value = {
     user,
     isAuthenticated,
-    isLoading: loading, // Map loading to isLoading
+    isLoading: loading,
     login,
     logout,
     register,

@@ -66,9 +66,14 @@ const Index = () => {
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </div>
         
+        {/* Show the demo mode message */}
+        <div className="mt-8 text-sm text-blue-400 max-w-md mx-auto">
+          <p>Running in demo mode - no backend connection required</p>
+        </div>
+        
         {/* Debug info for development */}
         {import.meta.env.DEV && (
-          <div className="mt-8 text-xs text-gray-400 max-w-md mx-auto text-left">
+          <div className="mt-4 text-xs text-gray-400 max-w-md mx-auto text-left">
             <p>isLoading: {isLoading ? "true" : "false"}</p>
             <p>isAuthenticated: {isAuthenticated ? "true" : "false"}</p>
             <p>redirecting: {redirecting ? "true" : "false"}</p>

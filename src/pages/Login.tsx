@@ -1,7 +1,8 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -68,24 +69,58 @@ export default function Login() {
     return <Navigate to={redirectPath} replace />;
   }
 
-  // const setDefaultEmail = (role: UserRole) => {
-  //   let email = "";
+  const setDefaultEmail = (role: UserRole) => {
+    let email = "";
 
-  //   switch (role) {
-  //     case "admin":
-  //       email = "admin@example.com";
-  //       break;
-  //     case "support":
-  //       email = "support@example.com";
-  //       break;
-  //     case "client":
-  //       email = "client@example.com";
-  //       break;
-  //   }
+    switch (role) {
+      case "admin":
+        email = "admin@example.com";
+        break;
+      case "support":
+        email = "support@example.com";
+        break;
+      case "client":
+        email = "client@example.com";
+        break;
+    }
 
-  //   form.setValue("email", email);
-  //   form.setValue("password", "password");
-  // };
+    form.setValue("email", email);
+    form.setValue("password", "password"); // Any password works in demo mode
+  };
+
+  const loginAsDemoUser = async (role: UserRole) => {
+    setIsLoading(true);
+    try {
+      let email = "";
+      switch (role) {
+        case "admin":
+          email = "admin@example.com";
+          break;
+        case "support":
+          email = "support@example.com";
+          break;
+        case "client":
+          email = "client@example.com";
+          break;
+      }
+      
+      const result = await login(email, "password");
+      if (result) {
+        toast({
+          title: "Demo login successful",
+          description: `Logged in as ${role}`,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Demo login failed",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
@@ -115,7 +150,7 @@ export default function Login() {
             className="w-full"
             onValueChange={(value) => {
               setActiveTab(value as UserRole);
-              // setDefaultEmail(value as UserRole);
+              setDefaultEmail(value as UserRole);
             }}
           >
             <TabsList className="grid w-full grid-cols-3">
@@ -249,11 +284,6 @@ export default function Login() {
                     </Button>
                   </form>
                 </Form>
-
-                <div className="mt-4 text-center text-sm text-muted-foreground">
-                  <p>Support access is restricted.</p>
-                  <p>Contact an administrator for account access.</p>
-                </div>
               </CardContent>
             </TabsContent>
 
@@ -312,26 +342,36 @@ export default function Login() {
                     </Button>
                   </form>
                 </Form>
-
-                <div className="mt-4 text-center text-sm text-muted-foreground">
-                  <p>Admin access is restricted.</p>
-                  <p>Contact the system administrator for access.</p>
-                </div>
               </CardContent>
             </TabsContent>
           </Tabs>
 
-          {/* <CardFooter className="flex flex-col border-t pt-4">
-            <div className="text-center text-sm text-muted-foreground mb-2">
-              <p>For demo purposes, use:</p>
-              <div className="mt-1 space-y-1">
-                <p>Admin: admin@example.com</p>
-                <p>Support: support@example.com</p>
-                <p>Client: client@example.com</p>
-                <p className="font-semibold">Password: password</p>
+          <CardFooter className="flex flex-col border-t pt-4">
+            <div className="text-center text-sm text-muted-foreground mb-4">
+              <p className="font-semibold mb-2">Quick Demo Login</p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                <Button variant="outline" size="sm" onClick={() => loginAsDemoUser('client')} disabled={isLoading}>
+                  <Key className="h-3 w-3 mr-1" /> Client
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => loginAsDemoUser('support')} disabled={isLoading}>
+                  <Key className="h-3 w-3 mr-1" /> Support
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => loginAsDemoUser('admin')} disabled={isLoading}>
+                  <Key className="h-3 w-3 mr-1" /> Admin
+                </Button>
               </div>
             </div>
-          </CardFooter> */}
+            
+            <div className="text-center text-xs text-muted-foreground">
+              <p>Demo accounts:</p>
+              <div className="mt-1 space-y-1">
+                <p>Admin: admin@example.com or director@example.com</p>
+                <p>Support: support@example.com or sarah.tech@example.com</p>
+                <p>Client: client@example.com or john.smith@company.com</p>
+                <p className="font-semibold">Any password works in demo mode</p>
+              </div>
+            </div>
+          </CardFooter>
         </Card>
       </div>
     </div>
