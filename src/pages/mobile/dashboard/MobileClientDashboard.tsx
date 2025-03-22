@@ -72,7 +72,7 @@ const MobileClientDashboard = () => {
     }
   };
   
-  const item = {
+  const itemAnimation = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 }
   };
@@ -105,7 +105,7 @@ const MobileClientDashboard = () => {
         initial="hidden"
         animate="show"
       >
-        <motion.div variants={item}>
+        <motion.div variants={itemAnimation}>
           <StatCard
             title="Active Tickets"
             value={2}
@@ -114,7 +114,7 @@ const MobileClientDashboard = () => {
             className="backdrop-blur-sm bg-white/5 border-0 shadow-lg"
           />
         </motion.div>
-        <motion.div variants={item}>
+        <motion.div variants={itemAnimation}>
           <StatCard
             title="Closed Tickets"
             value={8}
@@ -123,7 +123,7 @@ const MobileClientDashboard = () => {
             className="backdrop-blur-sm bg-white/5 border-0 shadow-lg"
           />
         </motion.div>
-        <motion.div variants={item}>
+        <motion.div variants={itemAnimation}>
           <StatCard
             title="Avg. Response"
             value="1.5h"
@@ -132,7 +132,7 @@ const MobileClientDashboard = () => {
             className="backdrop-blur-sm bg-white/5 border-0 shadow-lg"
           />
         </motion.div>
-        <motion.div variants={item}>
+        <motion.div variants={itemAnimation}>
           <StatCard
             title="Subscription"
             value="Pro"
@@ -168,32 +168,32 @@ const MobileClientDashboard = () => {
       >
         <motion.h2 
           className="text-lg font-medium text-white mb-2"
-          variants={item}
+          variants={itemAnimation}
         >
           Quick Access
         </motion.h2>
         
-        {menuItems.map((item, index) => (
+        {menuItems.map((menuItem, index) => (
           <motion.div 
             key={index} 
-            variants={item}
+            variants={itemAnimation}
             whileTap={{ scale: 0.98 }}
           >
             <Card 
               className="bg-gradient-to-br border-0 shadow-xl hover:shadow-2xl transition-all cursor-pointer overflow-hidden group"
-              onClick={item.onClick}
+              onClick={menuItem.onClick}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-30`} />
+              <div className={`absolute inset-0 bg-gradient-to-br ${menuItem.color} opacity-30`} />
               <div className="absolute inset-0 bg-gradient-to-br from-black/50 to-black/20" />
               <CardContent className="p-4 relative">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="p-2 rounded-lg bg-white/10 backdrop-blur-md">
-                      {item.icon}
+                      {menuItem.icon}
                     </div>
                     <div>
-                      <span className="font-medium text-white">{item.title}</span>
-                      <p className="text-xs text-white/70">{item.description}</p>
+                      <span className="font-medium text-white">{menuItem.title}</span>
+                      <p className="text-xs text-white/70">{menuItem.description}</p>
                     </div>
                   </div>
                   <div className="h-8 w-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center group-hover:bg-white/20 transition-all">

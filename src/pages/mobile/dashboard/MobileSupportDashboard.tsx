@@ -71,7 +71,7 @@ const MobileSupportDashboard = () => {
     }
   };
   
-  const item = {
+  const itemAnimation = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 }
   };
@@ -104,7 +104,7 @@ const MobileSupportDashboard = () => {
         initial="hidden"
         animate="show"
       >
-        <motion.div variants={item}>
+        <motion.div variants={itemAnimation}>
           <StatCard
             title="Assigned Tickets"
             value={7}
@@ -113,7 +113,7 @@ const MobileSupportDashboard = () => {
             className="backdrop-blur-sm bg-white/5 border-0 shadow-lg"
           />
         </motion.div>
-        <motion.div variants={item}>
+        <motion.div variants={itemAnimation}>
           <StatCard
             title="Completed Today"
             value={3}
@@ -124,7 +124,7 @@ const MobileSupportDashboard = () => {
             trendValue={1}
           />
         </motion.div>
-        <motion.div variants={item}>
+        <motion.div variants={itemAnimation}>
           <StatCard
             title="Response Time"
             value="2.5h"
@@ -135,7 +135,7 @@ const MobileSupportDashboard = () => {
             trendValue={15}
           />
         </motion.div>
-        <motion.div variants={item}>
+        <motion.div variants={itemAnimation}>
           <StatCard
             title="Satisfaction"
             value="4.8"
@@ -155,32 +155,32 @@ const MobileSupportDashboard = () => {
       >
         <motion.h2 
           className="text-lg font-medium text-white mb-2"
-          variants={item}
+          variants={itemAnimation}
         >
           Quick Access
         </motion.h2>
         
-        {menuItems.map((item, index) => (
+        {menuItems.map((menuItem, index) => (
           <motion.div 
             key={index} 
-            variants={item}
+            variants={itemAnimation}
             whileTap={{ scale: 0.98 }}
           >
             <Card 
               className="bg-gradient-to-br border-0 shadow-xl hover:shadow-2xl transition-all cursor-pointer overflow-hidden group"
-              onClick={item.onClick}
+              onClick={menuItem.onClick}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-30`} />
+              <div className={`absolute inset-0 bg-gradient-to-br ${menuItem.color} opacity-30`} />
               <div className="absolute inset-0 bg-gradient-to-br from-black/50 to-black/20" />
               <CardContent className="p-4 relative">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="p-2 rounded-lg bg-white/10 backdrop-blur-md">
-                      {item.icon}
+                      {menuItem.icon}
                     </div>
                     <div>
-                      <span className="font-medium text-white">{item.title}</span>
-                      <p className="text-xs text-white/70">{item.description}</p>
+                      <span className="font-medium text-white">{menuItem.title}</span>
+                      <p className="text-xs text-white/70">{menuItem.description}</p>
                     </div>
                   </div>
                   <div className="h-8 w-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center group-hover:bg-white/20 transition-all">
