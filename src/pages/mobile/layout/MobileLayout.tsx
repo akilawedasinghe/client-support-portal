@@ -76,9 +76,11 @@ export function MobileLayout() {
 
   return (
     <NotificationProvider>
-      <div className="w-full max-w-[100vw] min-h-screen bg-gradient-to-b from-slate-950 to-indigo-950 text-white overflow-x-hidden">
-        <main className="w-full pb-24 overflow-x-hidden mobile-page">
-          <Outlet />
+      <div className="w-full max-w-[100vw] min-h-screen bg-gradient-to-b from-slate-950 to-indigo-950 text-white overflow-x-hidden mobile-container">
+        <main className="w-full pb-24 overflow-x-hidden mobile-content-area">
+          <div className="mobile-page-container">
+            <Outlet />
+          </div>
         </main>
         
         {/* Fixed bottom navigation bar */}
