@@ -19,9 +19,9 @@ console.warn('Using mock authentication system. No actual Supabase connection.')
 export const getUserRole = async (userId: string): Promise<'admin' | 'client' | 'support' | null> => {
   // Check mock users (this would be handled by the AuthContext)
   const mockUsers = [
-    { id: '1', role: 'admin' },
-    { id: '2', role: 'support' },
-    { id: '3', role: 'client' },
+    { id: '1', role: 'admin' as const },
+    { id: '2', role: 'support' as const },
+    { id: '3', role: 'client' as const },
   ];
   
   const foundUser = mockUsers.find(user => user.id === userId);
