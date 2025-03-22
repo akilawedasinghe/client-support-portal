@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -76,12 +75,11 @@ export function MobileLayout() {
 
   return (
     <NotificationProvider>
-      <div className="w-full max-w-[100vw] min-h-screen bg-gradient-to-b from-slate-950 to-indigo-950 text-white overflow-x-hidden">
-        <main className="w-full pb-24 overflow-x-hidden mobile-page">
+      <div className="w-full min-h-screen bg-gradient-to-b from-slate-950 to-indigo-950 text-white overflow-hidden relative">
+        <main className="w-full max-w-full mx-auto pb-24 overflow-hidden mobile-page">
           <Outlet />
         </main>
         
-        {/* Fixed bottom navigation bar */}
         <nav className="fixed bottom-0 left-0 right-0 bg-black/40 backdrop-blur-lg border-t border-white/10 p-1.5 z-50">
           <div className="flex justify-around items-center">
             {navigationItems.map((item, index) => (
