@@ -85,11 +85,14 @@
   .mobile-container {
     position: relative;
     z-index: 5;
+    width: 100%;
+    display: flex;
   }
 
   .mobile-content-area {
     position: relative;
     z-index: 10;
+    width: 100%;
   }
 
   .mobile-page-container {
@@ -98,20 +101,30 @@
     overflow-x: hidden;
   }
 
-  /* Hide sidebar on mobile view */
+  /* Mobile sidebar styles to make it non-transparent and proper positioning */
   @media (max-width: 768px) {
     [data-sidebar="sidebar"] {
-      display: none !important;
+      background-color: hsl(var(--sidebar));
+      border-right: 1px solid hsl(var(--sidebar-border));
+      width: 70px;
+      min-width: 70px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 40;
     }
     
-    .group.peer {
-      display: none !important;
-    }
-    
-    /* Mobile content should take full width */
+    /* Adjust content to start after sidebar */
     .mobile-content-area {
-      width: 100% !important;
-      margin-left: 0 !important;
+      margin-left: 70px;
+      width: calc(100% - 70px) !important;
+    }
+    
+    /* Ensure main content doesn't overflow */
+    .mobile-main-content {
+      overflow-x: hidden;
+      width: 100%;
     }
   }
 }
