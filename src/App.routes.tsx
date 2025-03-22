@@ -33,11 +33,8 @@ import MobileAdminDashboard from "@/pages/mobile/dashboard/MobileAdminDashboard"
 import MobileClientDashboard from "@/pages/mobile/dashboard/MobileClientDashboard";
 import MobileSupportDashboard from "@/pages/mobile/dashboard/MobileSupportDashboard";
 import MobileNewTicketPage from "@/pages/mobile/tickets/MobileNewTicketPage";
-import MobileNotFound from "@/pages/mobile/MobileNotFound";
 
-// Main router configuration
 export const router = createBrowserRouter([
-  // Root redirect
   {
     path: "/",
     element: <DeviceRedirect />,
@@ -48,7 +45,6 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  
   // Desktop routes
   {
     path: "/login",
@@ -120,15 +116,10 @@ export const router = createBrowserRouter([
             path: "/knowledge",
             element: <KnowledgePage />,
           },
-          {
-            path: "*",
-            element: <NotFound />,
-          },
         ],
       }
     ],
   },
-  
   // Mobile routes
   {
     path: "/mobile",
@@ -201,16 +192,10 @@ export const router = createBrowserRouter([
             path: "/mobile/help",
             element: <div className="p-4 text-white">Help Center coming soon</div>,
           },
-          {
-            path: "*",
-            element: <MobileNotFound />,
-          },
         ],
       }
     ],
   },
-  
-  // Fallback route for non-matching paths
   {
     path: "*",
     element: <NotFound />,
