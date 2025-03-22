@@ -63,56 +63,61 @@ export const router = createBrowserRouter([
     element: <LandingPage />,
   },
   {
-    element: <ProtectedRoute><MainLayout /></ProtectedRoute>,
+    element: <ProtectedRoute />,
     children: [
       {
-        path: "/dashboard/admin",
-        element: <AdminDashboard />,
-      },
-      {
-        path: "/dashboard/client",
-        element: <ClientDashboard />,
-      },
-      {
-        path: "/dashboard/support",
-        element: <SupportDashboard />,
-      },
-      {
-        path: "/users",
-        element: <UsersPage />,
-      },
-      {
-        path: "/tickets",
-        element: <TicketsPage />,
-      },
-      {
-        path: "/tickets/:id",
-        element: <TicketDetailPage />,
-      },
-      {
-        path: "/tickets/new",
-        element: <NewTicketPage />,
-      },
-      {
-        path: "/notifications",
-        element: <NotificationsPage />,
-      },
-      {
-        path: "/profile",
-        element: <ProfilePage />,
-      },
-      {
-        path: "/settings",
-        element: <SettingsPage />,
-      },
-      {
-        path: "/analytics",
-        element: <AnalyticsPage />,
-      },
-      {
-        path: "/knowledge",
-        element: <KnowledgePage />,
-      },
+        element: <MainLayout />,
+        children: [
+          {
+            path: "/dashboard/admin",
+            element: <AdminDashboard />,
+          },
+          {
+            path: "/dashboard/client",
+            element: <ClientDashboard />,
+          },
+          {
+            path: "/dashboard/support",
+            element: <SupportDashboard />,
+          },
+          {
+            path: "/users",
+            element: <UsersPage />,
+          },
+          {
+            path: "/tickets",
+            element: <TicketsPage />,
+          },
+          {
+            path: "/tickets/:id",
+            element: <TicketDetailPage />,
+          },
+          {
+            path: "/tickets/new",
+            element: <NewTicketPage />,
+          },
+          {
+            path: "/notifications",
+            element: <NotificationsPage />,
+          },
+          {
+            path: "/profile",
+            element: <ProfilePage />,
+          },
+          {
+            path: "/settings",
+            element: <SettingsPage />,
+          },
+          {
+            path: "/analytics",
+            element: <AnalyticsPage />,
+          },
+          {
+            path: "/knowledge",
+            element: <KnowledgePage />,
+          },
+        ],
+      }
     ],
   },
   // Mobile routes
@@ -125,65 +130,70 @@ export const router = createBrowserRouter([
     element: <MobileLogin />,
   },
   {
-    element: <ProtectedRoute><MobileLayout /></ProtectedRoute>,
+    element: <ProtectedRoute />,
     children: [
       {
-        path: "/mobile/dashboard/admin",
-        element: <MobileAdminDashboard />,
-      },
-      {
-        path: "/mobile/dashboard/client",
-        element: <MobileClientDashboard />,
-      },
-      {
-        path: "/mobile/dashboard/support",
-        element: <MobileSupportDashboard />,
-      },
-      {
-        path: "/mobile/tickets/new",
-        element: <MobileNewTicketPage />,
-      },
-      // Placeholder routes - using desktop components until mobile versions are created
-      {
-        path: "/mobile/tickets",
-        element: <TicketsPage />,
-      },
-      {
-        path: "/mobile/tickets/:id",
-        element: <TicketDetailPage />,
-      },
-      {
-        path: "/mobile/users",
-        element: <UsersPage />,
-      },
-      {
-        path: "/mobile/notifications",
-        element: <NotificationsPage />,
-      },
-      {
-        path: "/mobile/profile",
-        element: <ProfilePage />,
-      },
-      {
-        path: "/mobile/settings",
-        element: <SettingsPage />,
-      },
-      {
-        path: "/mobile/analytics",
-        element: <AnalyticsPage />,
-      },
-      {
-        path: "/mobile/knowledge",
-        element: <KnowledgePage />,
-      },
-      {
-        path: "/mobile/chat",
-        element: <div className="p-4 text-white">Chat feature coming soon</div>,
-      },
-      {
-        path: "/mobile/help",
-        element: <div className="p-4 text-white">Help Center coming soon</div>,
-      },
+        element: <MobileLayout />,
+        children: [
+          {
+            path: "/mobile/dashboard/admin",
+            element: <MobileAdminDashboard />,
+          },
+          {
+            path: "/mobile/dashboard/client",
+            element: <MobileClientDashboard />,
+          },
+          {
+            path: "/mobile/dashboard/support",
+            element: <MobileSupportDashboard />,
+          },
+          {
+            path: "/mobile/tickets/new",
+            element: <MobileNewTicketPage />,
+          },
+          // Placeholder routes - using desktop components until mobile versions are created
+          {
+            path: "/mobile/tickets",
+            element: <TicketsPage />,
+          },
+          {
+            path: "/mobile/tickets/:id",
+            element: <TicketDetailPage />,
+          },
+          {
+            path: "/mobile/users",
+            element: <UsersPage />,
+          },
+          {
+            path: "/mobile/notifications",
+            element: <NotificationsPage />,
+          },
+          {
+            path: "/mobile/profile",
+            element: <ProfilePage />,
+          },
+          {
+            path: "/mobile/settings",
+            element: <SettingsPage />,
+          },
+          {
+            path: "/mobile/analytics",
+            element: <AnalyticsPage />,
+          },
+          {
+            path: "/mobile/knowledge",
+            element: <KnowledgePage />,
+          },
+          {
+            path: "/mobile/chat",
+            element: <div className="p-4 text-white">Chat feature coming soon</div>,
+          },
+          {
+            path: "/mobile/help",
+            element: <div className="p-4 text-white">Help Center coming soon</div>,
+          },
+        ],
+      }
     ],
   },
   {
