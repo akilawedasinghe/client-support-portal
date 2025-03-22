@@ -77,7 +77,7 @@ const MobileSupportDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 to-indigo-950 px-4 py-6 pb-20">
+    <div className="w-full min-h-screen bg-gradient-to-b from-slate-950 to-indigo-950 px-4 py-6 pb-20">
       {/* Header with gradient underline */}
       <motion.div 
         className="mb-6"

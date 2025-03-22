@@ -1,4 +1,3 @@
-
 #root {
   width: 100%;
   height: 100%;
@@ -199,11 +198,20 @@ body, html {
   .ml-\[70px\] {
     margin-left: 0 !important;
   }
+
+  /* Fix the left sidebar issue */
+  .sidebar-left {
+    width: 0 !important;
+    display: none !important;
+  }
   
   /* Ensure full width for main content */
   .md\:w-\[calc\(100vw-70px\)\],
-  .lg\:w-\[calc\(100vw-240px\)\] {
+  .lg\:w-\[calc\(100vw-240px\)\],
+  .w-\[calc\(100vw-70px\)\],
+  .w-\[calc\(100vw-240px\)\] {
     width: 100% !important;
+    max-width: 100% !important;
   }
   
   /* Fix overflow issues */
@@ -214,6 +222,7 @@ body, html {
   /* Fix chat container */
   .chat-page-container {
     height: calc(100vh - 64px) !important;
+    width: 100% !important;
   }
   
   /* Ensure headers don't overflow */
@@ -232,26 +241,39 @@ body, html {
     height: 250px !important;
   }
   
-  /* Landing page mobile fixes */
-  .landing-cta {
-    flex-direction: column !important;
+  /* Mobile layout fixes */
+  .mobile-container {
     width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    overflow-x: hidden !important;
   }
-  
-  .landing-cta button {
-    width: 100% !important;
-    margin-bottom: 0.5rem !important;
-  }
-  
-  /* Fix registration pages on mobile */
-  .registration-container {
-    padding: 1rem !important;
-  }
-  
-  /* Ensure forms are easier to use on mobile */
-  input, select, textarea {
-    font-size: 16px !important; /* Prevents iOS zoom on focus */
-  }
+}
+
+/* Force full width for mobile views */
+.mobile-full-width {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  box-sizing: border-box !important;
+}
+
+/* Mobile-specific elements */
+.mobile-page {
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
+/* Fix bottom navigation spacing */
+.pb-20 {
+  padding-bottom: 5rem !important;
 }
 
 /* Add specific animation classes for landing page elements */

@@ -76,8 +76,8 @@ export function MobileLayout() {
 
   return (
     <NotificationProvider>
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 to-indigo-950 text-white relative">
-        <main className="pb-20">
+      <div className="w-full min-h-screen bg-gradient-to-b from-slate-950 to-indigo-950 text-white">
+        <main className="w-full pb-20">
           <Outlet />
         </main>
         
