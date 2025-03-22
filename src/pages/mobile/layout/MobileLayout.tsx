@@ -76,9 +76,12 @@ export function MobileLayout() {
 
   return (
     <NotificationProvider>
-      <div className="w-full max-w-[100vw] min-h-screen bg-gradient-to-b from-slate-950 to-indigo-950 text-white overflow-x-hidden">
-        <main className="w-full pb-24 overflow-x-hidden mobile-page">
-          <Outlet />
+      <div className="flex flex-col min-h-screen bg-gradient-to-b from-slate-950 to-indigo-950 text-white overflow-hidden">
+        {/* Main content area with padding to prevent bottom nav overlap */}
+        <main className="flex-1 overflow-auto pb-24">
+          <div className="container px-4 py-4">
+            <Outlet />
+          </div>
         </main>
         
         {/* Fixed bottom navigation bar */}
