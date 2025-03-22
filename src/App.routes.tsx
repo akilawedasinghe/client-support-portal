@@ -1,7 +1,7 @@
 
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { MainLayout } from "@/components/layout/MainLayout";
 import MobileLayout from "@/pages/mobile/layout/MobileLayout";
 import DeviceRedirect from "@/components/DeviceRedirect";
