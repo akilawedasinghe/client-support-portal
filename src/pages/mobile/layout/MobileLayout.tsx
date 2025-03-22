@@ -76,8 +76,8 @@ export function MobileLayout() {
 
   return (
     <NotificationProvider>
-      <div className="w-full min-h-screen bg-gradient-to-b from-slate-950 to-indigo-950 text-white">
-        <main className="w-full pb-20">
+      <div className="w-full max-w-[100vw] min-h-screen bg-gradient-to-b from-slate-950 to-indigo-950 text-white overflow-x-hidden">
+        <main className="w-full pb-24 overflow-x-hidden mobile-page">
           <Outlet />
         </main>
         
