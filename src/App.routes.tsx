@@ -1,4 +1,3 @@
-
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -33,6 +32,7 @@ import MobileAdminDashboard from "@/pages/mobile/dashboard/MobileAdminDashboard"
 import MobileClientDashboard from "@/pages/mobile/dashboard/MobileClientDashboard";
 import MobileSupportDashboard from "@/pages/mobile/dashboard/MobileSupportDashboard";
 import MobileNewTicketPage from "@/pages/mobile/tickets/MobileNewTicketPage";
+import MobileAnalyticsPage from "@/pages/mobile/analytics/MobileAnalyticsPage";
 
 export const router = createBrowserRouter([
   {
@@ -45,7 +45,6 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  // Desktop routes
   {
     path: "/login",
     element: <Login />,
@@ -120,7 +119,6 @@ export const router = createBrowserRouter([
       }
     ],
   },
-  // Mobile routes
   {
     path: "/mobile",
     element: <MobileIndex />,
@@ -151,7 +149,10 @@ export const router = createBrowserRouter([
             path: "/mobile/tickets/new",
             element: <MobileNewTicketPage />,
           },
-          // Placeholder routes - using desktop components until mobile versions are created
+          {
+            path: "/mobile/analytics",
+            element: <MobileAnalyticsPage />,
+          },
           {
             path: "/mobile/tickets",
             element: <TicketsPage />,
@@ -175,10 +176,6 @@ export const router = createBrowserRouter([
           {
             path: "/mobile/settings",
             element: <SettingsPage />,
-          },
-          {
-            path: "/mobile/analytics",
-            element: <AnalyticsPage />,
           },
           {
             path: "/mobile/knowledge",
